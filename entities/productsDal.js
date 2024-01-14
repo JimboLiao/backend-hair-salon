@@ -53,8 +53,19 @@ Product.init(
   }
 );
 
-const getProductsDal = () => {
-  return;
+const getProductsDal = async (page, pageSize) => {
+  const offset = (page - 1) * pageSize;
+  const { count, rows: data } = await Product.findAndCountAll({
+    offset: offset,
+    limit: pageSize,
+  });
+
+  return { count, data };
 };
 
-module.exports = { Product, getProductsDal };
+const getProductByIdDal = async (id) => {
+  const product = await Product.findByPk(id);
+  return product;
+};
+
+module.exports = { Product, getProductsDal, getProductByIdDal };
