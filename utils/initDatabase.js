@@ -1,13 +1,14 @@
 const { Product } = require("../entities/productsDal");
 const sequelize = require("../entities/sequelizeModel");
 
+PRODUCT_CATEGORIES = ["shampoo", "conditioner", "hair wax"];
 function genProducts(n) {
   const products = [];
   for (let i = 1; i <= n; i++) {
     products.push({
       id: i,
-      productName: `foo${i}`,
-      category: "bar",
+      productName: `Product ${i}`,
+      category: `${PRODUCT_CATEGORIES[i % PRODUCT_CATEGORIES.length]}`,
       description: "description",
       price: 100,
       brandId: i > n / 2 ? 1 : 2,
