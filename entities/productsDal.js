@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require("sequelize");
+const { Model, DataTypes, Op } = require("sequelize");
 const sequelize = require("./sequelizeModel");
 
 class Product extends Model {}
@@ -58,6 +58,11 @@ const getProductsDal = async (page, pageSize) => {
   const { count, rows: data } = await Product.findAndCountAll({
     offset: offset,
     limit: pageSize,
+    where: {
+      deletedAt: {
+        [Op.is]: null,
+      },
+    },
   });
 
   return { count, data };
@@ -68,4 +73,64 @@ const getProductByIdDal = async (id) => {
   return product;
 };
 
-module.exports = { Product, getProductsDal, getProductByIdDal };
+const createProductDal = async (product) => {
+  const {
+    productName,
+    category,
+    description,
+    price,
+    brandId,
+    imgUrl,
+    reserve,
+  } = product;
+
+  const newProduct = await Product.create(product);
+  return newProduct.id;
+};
+
+const updateProductDal = async (id, product) => {
+  const {
+    productName,
+    category,
+    description,
+    price,
+    brandId,
+    imgUrl,
+    reserve,
+  } = product;
+  const selectedProduct = await Product.findByPk(id);
+  if (!selectedProduct) {
+    throw new Error("Not Found");
+  }
+  selectedProduct.productName = productName || selectedProduct.productName;
+  selectedProduct.category = category || selectedProduct.category;
+  selectedProduct.description = description || selectedProduct.description;
+  selectedProduct.price = price || selectedProduct.price;
+  selectedProduct.brandId = brandId || selectedProduct.brandId;
+  selectedProduct.imgUrl = imgUrl || selectedProduct.imgUrl;
+  selectedProduct.reserve = reserve || selectedProduct.reserve;
+
+  await selectedProduct.save();
+  return selectedProduct.id;
+};
+
+const deleteProductDal = async (id) => {
+  const selectedProduct = await Product.findByPk(id);
+
+  if (!selectedProduct) {
+    throw new Error("Not Found");
+  }
+
+  // soft delete
+  selectedProduct.deletedAt = Date.now();
+  await selectedProduct.save();
+};
+
+module.exports = {
+  Product,
+  getProductsDal,
+  getProductByIdDal,
+  createProductDal,
+  updateProductDal,
+  deleteProductDal,
+};

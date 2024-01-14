@@ -1,12 +1,16 @@
 const {
   getProductsDal,
   getProductByIdDal,
+  createProductDal,
+  updateProductDal,
+  deleteProductDal,
 } = require("../entities/productsDal");
 const {
   notFound,
   serverError,
   failResponse,
 } = require("../utils/failResponse");
+const { checkParams } = require("../utils/checkReq");
 
 const getProducts = async (req, res) => {
   // pagination start with page 1
@@ -54,11 +58,67 @@ const getProduct = async (req, res) => {
   }
 };
 
-const createProduct = (req, res) => {};
+const createProduct = async (req, res) => {
+  try {
+    const requiredProductValues = [
+      "productName",
+      "category",
+      "description",
+      "price",
+      "brandId",
+      "imgUrl",
+    ];
+    const checkResult = checkParams(req.body, requiredProductValues);
+    if (checkResult.isPassed) {
+      const newProductId = await createProductDal(req.body);
+      res.status(201).json({ id: newProductId });
+    } else {
+      failResponse(
+        res,
+        400,
+        `Missing required argument: ${checkResult.missingParam}`
+      );
+    }
+  } catch (err) {
+    console.error(err);
+    if (err instanceof Error) {
+      return failResponse(res, 500, err.message);
+    } else {
+      return serverError(res);
+    }
+  }
+};
 
-const updateProduct = (req, res) => {};
+const updateProduct = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const productId = await updateProductDal(id, req.body);
+    res.status(200).json({ id: productId });
+  } catch (err) {
+    console.error(err);
+    if (err instanceof Error) {
+      if (err.message === "Not Found") return notFound(res);
+      return failResponse(res, 500, err.message);
+    } else {
+      return serverError(res);
+    }
+  }
+};
 
-const deleteProduct = (req, res) => {};
+const deleteProduct = async (req, res) => {
+  try {
+    const id = req.params.id;
+    await deleteProductDal(id);
+    res.status(200).json({ id: id });
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.message === "Not Found") return notFound(res);
+      return failResponse(res, 500, err.message);
+    } else {
+      return serverError(res);
+    }
+  }
+};
 
 module.exports = {
   getProducts,
