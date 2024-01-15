@@ -108,8 +108,8 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const id = req.params.id;
-    await deleteProductDal(id);
-    res.status(200).json({ id: id });
+    const productId = await deleteProductDal(id);
+    res.status(200).json({ id: productId });
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "Not Found") return notFound(res);
