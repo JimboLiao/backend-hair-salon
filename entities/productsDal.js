@@ -59,9 +59,7 @@ const getProductsDal = async (page, pageSize) => {
     offset: offset,
     limit: pageSize,
     where: {
-      deletedAt: {
-        [Op.is]: null,
-      },
+      deletedAt: null,
     },
   });
 
