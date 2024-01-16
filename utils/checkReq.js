@@ -1,3 +1,4 @@
+// check an item (object) having specific attributes (params array) or not
 const checkParams = (item, params) => {
   for (const param of params) {
     if (!item[param]) {

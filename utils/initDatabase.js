@@ -1,6 +1,7 @@
 const { Product } = require("../entities/productsDal");
 const { Brand } = require("../entities/brandsDal");
 const sequelize = require("../entities/sequelizeModel");
+const { Member } = require("../entities/membersDal");
 
 PRODUCT_CATEGORIES = ["shampoo", "conditioner", "hair wax"];
 function genProducts(n) {
@@ -49,11 +50,21 @@ async function initBrands() {
   console.log("\n\n === Table brand initialized === \n\n");
 }
 
+async function initMembers() {
+  const member = {
+    email: "test@email.com",
+    username: "hello",
+    password: "123",
+  };
+  await Member.create(member);
+  console.log("\n\n === Table member initialized === \n\n");
+}
+
 async function initDatabase() {
   try {
     // drop tables first then create tables
     await sequelize.sync({ force: true });
-    await Promise.all([initProducts(), initBrands()]);
+    await Promise.all([initProducts(), initBrands(), initMembers()]);
     await sequelize.close();
     console.log("\n\n === Database initialized === \n\n");
   } catch (err) {

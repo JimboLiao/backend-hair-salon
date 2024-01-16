@@ -13,4 +13,22 @@ const serverError = (res) => {
   return failResponse(res, 500, "Server Error");
 };
 
-module.exports = { failResponse, notFound, serverError };
+const authFail = (res) => {
+  return failResponse(res, 403, "Authenticate failed");
+};
+
+const noToken = (res) => {
+  return failResponse(res, 401, "No token");
+};
+
+const wrongPassword = (res) => {
+  return failResponse(res, 401, "Wrong password");
+};
+module.exports = {
+  failResponse,
+  notFound,
+  serverError,
+  authFail,
+  noToken,
+  wrongPassword,
+};
