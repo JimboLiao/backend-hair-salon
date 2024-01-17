@@ -1,7 +1,7 @@
 const { Product } = require("../entities/productsDal");
 const { Brand } = require("../entities/brandsDal");
 const sequelize = require("../entities/sequelizeModel");
-const { Member } = require("../entities/membersDal");
+const { Member, createMemberDal } = require("../entities/membersDal");
 
 PRODUCT_CATEGORIES = ["shampoo", "conditioner", "hair wax"];
 function genProducts(n) {
@@ -56,7 +56,8 @@ async function initMembers() {
     username: "hello",
     password: "123",
   };
-  await Member.create(member);
+
+  await createMemberDal(member);
   console.log("\n\n === Table member initialized === \n\n");
 }
 
