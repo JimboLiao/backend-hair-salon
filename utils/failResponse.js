@@ -24,6 +24,14 @@ const noToken = (res) => {
 const wrongPassword = (res) => {
   return failResponse(res, 401, "Wrong password");
 };
+
+const badQuery = (res) => {
+  return failResponse(res, 400, "Unsupported query parameter.");
+};
+
+const badBodyValue = (res) => {
+  return failResponse(res, 400, "Bad body value.");
+};
 module.exports = {
   failResponse,
   notFound,
@@ -31,4 +39,6 @@ module.exports = {
   authFail,
   noToken,
   wrongPassword,
+  badQuery,
+  badBodyValue,
 };
