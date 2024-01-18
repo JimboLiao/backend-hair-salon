@@ -17,7 +17,11 @@ const getProducts = async (req, res) => {
   const page = Number(req.query.page) || 1;
   const pageSize = Number(req.query.pageSize) || 6;
   try {
-    const { count, data } = await getProductsDal(page, pageSize);
+    const query = {
+      brandId: req.query.brandId,
+      category: req.query.category,
+    };
+    const { count, data } = await getProductsDal(page, pageSize, query);
 
     const pagination = {
       page: page,

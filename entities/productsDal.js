@@ -53,14 +53,16 @@ Product.init(
   }
 );
 
-const getProductsDal = async (page, pageSize) => {
+const getProductsDal = async (page, pageSize, query) => {
+  const { brandId, category } = query;
+  const where = { deletedAt: null };
+  if (brandId) where.brandId = brandId;
+  if (category) where.category = category;
   const offset = (page - 1) * pageSize;
   const { count, rows: data } = await Product.findAndCountAll({
     offset: offset,
     limit: pageSize,
-    where: {
-      deletedAt: null,
-    },
+    where: where,
   });
 
   return { count, data };
@@ -125,6 +127,15 @@ const deleteProductDal = async (id) => {
   return selectedProduct.id;
 };
 
+const getProductsByIdsDal = async (ids) => {
+  // ids is an array of many id, ids = [{id: 1}, {id: 2} ...]
+  const products = await Product.findAll({
+    where: {
+      [Op.or]: ids,
+    },
+  });
+  return products;
+};
 module.exports = {
   Product,
   getProductsDal,
@@ -132,4 +143,5 @@ module.exports = {
   createProductDal,
   updateProductDal,
   deleteProductDal,
+  getProductsByIdsDal,
 };
