@@ -15,7 +15,7 @@ function genProducts(n) {
       description: "description",
       price: 100,
       brandId: i > n / 2 ? 1 : 2,
-      imgUrl: "url",
+      imgUrl: "images/products-1-1.png",
       reserve: 2,
       deletedAt: null,
       createdAt: new Date(),

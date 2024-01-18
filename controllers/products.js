@@ -11,6 +11,7 @@ const {
   failResponse,
 } = require("../utils/failResponse");
 const { checkParams } = require("../utils/checkReq");
+const { getBrandByIdDal } = require("../entities/brandsDal");
 
 const getProducts = async (req, res) => {
   // pagination start with page 1
@@ -51,7 +52,11 @@ const getProduct = async (req, res) => {
     if (product === null) {
       notFound(res);
     }
-    res.status(200).json({ data: product });
+    if (req.query._expand === "brand") {
+      const brand = await getBrandByIdDal(product.brandId);
+      return res.status(200).json({ data: { product: product, brand: brand } });
+    }
+    return res.status(200).json({ data: product });
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
