@@ -6,23 +6,15 @@ const {
   deleteBrandDal,
 } = require("../entities/brandsDal");
 const { checkParams } = require("../utils/checkReq");
-const {
-  failResponse,
-  serverError,
-  notFound,
-} = require("../utils/failResponse");
+const { failResponse } = require("../utils/failResponse");
+const { handleError } = require("../utils/handleErr");
 
 const getBrands = async (req, res) => {
   try {
     const brands = await getBrandsDal();
     res.status(200).json({ data: brands });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -32,13 +24,7 @@ const getBrand = async (req, res) => {
     const brand = await getBrandByIdDal(id);
     res.status(200).json({ data: brand });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -57,12 +43,7 @@ const createBrand = async (req, res) => {
       );
     }
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 const updateBrand = async (req, res) => {
@@ -71,13 +52,7 @@ const updateBrand = async (req, res) => {
     const brandId = await updateBrandDal(id, req.body);
     res.status(200).json({ id: brandId });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 const deleteBrand = async (req, res) => {
@@ -86,13 +61,7 @@ const deleteBrand = async (req, res) => {
     const brandId = await deleteBrandDal(id);
     res.status(200).json({ id: brandId });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 

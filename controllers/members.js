@@ -6,12 +6,8 @@ const {
 } = require("../entities/membersDal");
 const { checkParams } = require("../utils/checkReq");
 const jwt = require("jsonwebtoken");
-const {
-  failResponse,
-  serverError,
-  notFound,
-  wrongPassword,
-} = require("../utils/failResponse");
+const { failResponse } = require("../utils/failResponse");
+const { handleError } = require("../utils/handleErr");
 
 const getMember = async (req, res) => {
   try {
@@ -19,12 +15,7 @@ const getMember = async (req, res) => {
     const member = await getMemberByIdDal(id);
     res.status(200).json({ data: member });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 const createMember = async (req, res) => {
@@ -42,12 +33,7 @@ const createMember = async (req, res) => {
       );
     }
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -58,13 +44,7 @@ const updateMember = async (req, res) => {
     const memberId = await updateMemberDal(updateData);
     res.status(200).json({ id: memberId });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -91,14 +71,7 @@ const loginMember = async (req, res) => {
       );
     }
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      if (err.message === "Wrong password") return wrongPassword(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 

@@ -12,15 +12,10 @@ const {
   bulkCreateProductsInOrderDal,
 } = require("../entities/productsInOrderDal");
 const { checkParams } = require("../utils/checkReq");
-const {
-  badQuery,
-  authFail,
-  failResponse,
-  badBodyValue,
-  notFound,
-} = require("../utils/failResponse");
+const { failResponse } = require("../utils/failResponse");
 const sequelize = require("../entities/sequelizeModel");
 const ecpay_payment = require("ecpay_aio_nodejs");
+const { handleError } = require("../utils/handleErr");
 const { MERCHANTID, HASHKEY, HASHIV, HOST, CLIENT } = process.env;
 const ecpay_options = {
   OperationMode: "Test", //Test or Production
@@ -76,20 +71,14 @@ const getOrders = async (req, res) => {
 
         return res.status(200).json({ data: results });
       } else {
-        return badQuery(res);
+        throw new Error("Bad query");
       }
     } else {
       // no queries
       return res.status(200).json({ data: orders });
     }
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -97,16 +86,10 @@ const getOrder = async (req, res) => {
   try {
     const id = req.params.id;
     const order = await getOrderByIdDal(id);
-    if (order.memberId !== res.locals.id) return authFail(res);
+    if (order.memberId !== res.locals.id) throw new Error("Auth Fail");
     return res.status(200).json({ data: order });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -170,7 +153,7 @@ const createOrder = async (req, res) => {
       });
 
       if (!Array.isArray(req.body.productInfos) || !isValidInfos) {
-        return badBodyValue(res);
+        throw new Error("Bad Value");
       }
 
       const newOrder = req.body;
@@ -191,13 +174,7 @@ const createOrder = async (req, res) => {
       await t.commit();
       res.status(201).json(html);
     } catch (err) {
-      console.error(err);
-      if (err instanceof Error) {
-        if (err.message === "Not Found") return notFound(res);
-        return failResponse(res, 500, err.message);
-      } else {
-        return serverError(res);
-      }
+      handleError(err, res);
     }
   } else {
     failResponse(
@@ -232,14 +209,7 @@ const ecpayReturn = async (req, res) => {
       res.send("not successful");
     }
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      if (err.message === "Bad Value") return badBodyValue(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -251,14 +221,7 @@ const updateOrder = async (req, res) => {
     const orderId = await updateOrderDal(req.params.id, order);
     return res.status(200).json({ id: orderId });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      if (err.message === "Bad Value") return badBodyValue(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -269,14 +232,7 @@ const deleteOrder = async (req, res) => {
     const orderId = await deleteOrderDal(id, memberId);
     return res.status(200).json({ id: orderId });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      if (err.message === "Bad Value") return badBodyValue(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 

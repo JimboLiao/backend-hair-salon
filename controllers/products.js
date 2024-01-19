@@ -5,13 +5,10 @@ const {
   updateProductDal,
   deleteProductDal,
 } = require("../entities/productsDal");
-const {
-  notFound,
-  serverError,
-  failResponse,
-} = require("../utils/failResponse");
+const { failResponse } = require("../utils/failResponse");
 const { checkParams } = require("../utils/checkReq");
 const { getBrandByIdDal } = require("../entities/brandsDal");
+const { handleError } = require("../utils/handleErr");
 
 const getProducts = async (req, res) => {
   // pagination start with page 1
@@ -36,12 +33,7 @@ const getProducts = async (req, res) => {
       pagination: pagination,
     });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -50,7 +42,7 @@ const getProduct = async (req, res) => {
     const id = Number(req.params.id);
     const product = await getProductByIdDal(id);
     if (product === null) {
-      notFound(res);
+      throw new Error("Not Found");
     }
     if (req.query._expand === "brand") {
       const brand = await getBrandByIdDal(product.brandId);
@@ -58,12 +50,7 @@ const getProduct = async (req, res) => {
     }
     return res.status(200).json({ data: product });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -89,12 +76,7 @@ const createProduct = async (req, res) => {
       );
     }
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -104,13 +86,7 @@ const updateProduct = async (req, res) => {
     const productId = await updateProductDal(id, req.body);
     res.status(200).json({ id: productId });
   } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
@@ -120,12 +96,7 @@ const deleteProduct = async (req, res) => {
     const productId = await deleteProductDal(id);
     res.status(200).json({ id: productId });
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.message === "Not Found") return notFound(res);
-      return failResponse(res, 500, err.message);
-    } else {
-      return serverError(res);
-    }
+    handleError(err, res);
   }
 };
 
