@@ -132,8 +132,10 @@ const deleteOrderDal = async (id, memberId) => {
   }
 
   // soft delete
-  selectedOrder.deletedAt = Date.now();
-  await selectedOrder.save();
+  if (!selectedOrder.deletedAt) {
+    selectedOrder.deletedAt = Date.now();
+    await selectedOrder.save();
+  }
   return selectedOrder.id;
 };
 

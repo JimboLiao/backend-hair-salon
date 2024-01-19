@@ -82,8 +82,10 @@ const deleteBrandDal = async (id) => {
     throw new Error("Not Found");
   }
 
-  brand.deletedAt = Date.now();
-  await brand.save();
+  if (!brand.deletedAt) {
+    brand.deletedAt = Date.now();
+    await brand.save();
+  }
   return brand.id;
 };
 
