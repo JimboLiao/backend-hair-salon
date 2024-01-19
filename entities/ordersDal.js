@@ -72,13 +72,16 @@ const getOrderByIdDal = async (id) => {
   return order;
 };
 
-const createOrderDal = async (order) => {
+const createOrderDal = async (order, transaction) => {
   const { memberId, delivery, tradeNo } = order;
-  const newOrder = await Order.create({
-    memberId: memberId,
-    delivery: delivery,
-    tradeNo: tradeNo,
-  });
+  const newOrder = await Order.create(
+    {
+      memberId: memberId,
+      delivery: delivery,
+      tradeNo: tradeNo,
+    },
+    { transaction: transaction }
+  );
 
   return newOrder.id;
 };
@@ -106,6 +109,17 @@ const updateOrderDal = async (id, order) => {
   return selectedOrder.id;
 };
 
+const afterPaymentOrderDal = async (id) => {
+  const selectedOrder = await Order.findByPk(id);
+  if (!selectedOrder) {
+    throw new Error("Not Found");
+  }
+
+  selectedOrder.status = orderStatus.PROCESS;
+  await selectedOrder.save();
+  return selectedOrder.id;
+};
+
 const deleteOrderDal = async (id, memberId) => {
   const selectedOrder = await Order.findByPk(id);
 
@@ -114,8 +128,6 @@ const deleteOrderDal = async (id, memberId) => {
   }
 
   if (selectedOrder.memberId !== Number(memberId)) {
-    console.log("memberId = ", memberId, " ", typeof memberId);
-    console.log(selectedOrder.memberId, " !== ", Number(memberId));
     throw new Error("Auth Fail");
   }
 
@@ -133,4 +145,5 @@ module.exports = {
   createOrderDal,
   updateOrderDal,
   deleteOrderDal,
+  afterPaymentOrderDal,
 };

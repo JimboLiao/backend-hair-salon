@@ -35,7 +35,11 @@ async function getProductsInOrderByOrderIdDal(orderId) {
   return selectedProductsInOrder;
 }
 
-async function bulkCreateProductsInOrderDal(orderId, productInfos) {
+async function bulkCreateProductsInOrderDal(
+  orderId,
+  productInfos,
+  transaction
+) {
   // productInfos = [{productId: id, productAmount: amount}, ...];
 
   const newProductInOrders = productInfos.map((info) => {
@@ -46,7 +50,9 @@ async function bulkCreateProductsInOrderDal(orderId, productInfos) {
     };
   });
 
-  await ProductInOrder.bulkCreate(newProductInOrders);
+  await ProductInOrder.bulkCreate(newProductInOrders, {
+    transaction: transaction,
+  });
 }
 
 module.exports = {
