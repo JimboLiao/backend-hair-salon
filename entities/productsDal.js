@@ -53,6 +53,17 @@ Product.init(
   }
 );
 
+const searchProductDal = async (page, pageSize, q) => {
+  const where = { productName: { [Op.like]: `%${q}%` } };
+  const offset = (page - 1) * pageSize;
+  const { count, rows: data } = await Product.findAndCountAll({
+    offset: offset,
+    limit: pageSize,
+    where: where,
+  });
+  return { count, data };
+};
+
 const getProductsDal = async (page, pageSize, query) => {
   const { brandId, category } = query;
   const where = { deletedAt: null };
@@ -146,4 +157,5 @@ module.exports = {
   updateProductDal,
   deleteProductDal,
   getProductsByIdsDal,
+  searchProductDal,
 };

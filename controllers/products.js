@@ -4,11 +4,34 @@ const {
   createProductDal,
   updateProductDal,
   deleteProductDal,
+  searchProductDal,
 } = require("../entities/productsDal");
 const { failResponse } = require("../utils/failResponse");
 const { checkParams } = require("../utils/checkReq");
 const { getBrandByIdDal } = require("../entities/brandsDal");
 const { handleError } = require("../utils/handleErr");
+
+const searchProducts = async (req, res) => {
+  // pagination start with page 1
+  const page = Number(req.query.page) || 1;
+  const pageSize = Number(req.query.pageSize) || 6;
+  const q = req.query.q || "";
+  try {
+    const { count, data } = await searchProductDal(page, pageSize, q);
+    const pagination = {
+      page: page,
+      pageSize: pageSize,
+      nextPage: count > page * pageSize ? page + 1 : null,
+      totalCount: count,
+    };
+    res.json({
+      data: data,
+      pagination: pagination,
+    });
+  } catch (err) {
+    handleError(err, res);
+  }
+};
 
 const getProducts = async (req, res) => {
   // pagination start with page 1
@@ -106,4 +129,5 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  searchProducts,
 };
