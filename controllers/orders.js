@@ -142,46 +142,45 @@ const ecpayCreditOneTime = (ecpayArg) => {
 const createOrder = async (req, res) => {
   const requiredValues = ["grandTotal", "delivery", "productInfos"];
   const checkResult = checkParams(req.body, requiredValues);
-  if (checkResult.isPassed) {
-    const t = await sequelize.transaction();
-    try {
-      const isValidInfos = req.body.productInfos.every((info) => {
-        return (
-          info.hasOwnProperty("productId") &&
-          info.hasOwnProperty("productAmount")
-        );
-      });
-
-      if (!Array.isArray(req.body.productInfos) || !isValidInfos) {
-        throw new Error("Bad Value");
-      }
-
-      const newOrder = req.body;
-      newOrder.memberId = res.locals.id;
-      const tradeNo = "test" + new Date().getTime();
-
-      newOrder.tradeNo = tradeNo;
-      const orderId = await createOrderDal(newOrder, t);
-      await bulkCreateProductsInOrderDal(orderId, req.body.productInfos, t);
-
-      const { html } = ecpayCreditOneTime({
-        totalAmount: req.body.grandTotal.toString(),
-        tradeDesc: "Description",
-        itemName: "ItemName",
-        orderId: orderId.toString(),
-        tradeNo: tradeNo,
-      });
-      await t.commit();
-      res.status(201).json(html);
-    } catch (err) {
-      handleError(err, res);
-    }
-  } else {
-    failResponse(
+  if (!checkParams(req.body, requiredValues).isPassed) {
+    return failResponse(
       res,
       400,
       `Missing required argument: ${checkResult.missingParam}`
     );
+  }
+
+  const t = await sequelize.transaction();
+  try {
+    const isValidInfos = req.body.productInfos.every((info) => {
+      return (
+        info.hasOwnProperty("productId") && info.hasOwnProperty("productAmount")
+      );
+    });
+
+    if (!Array.isArray(req.body.productInfos) || !isValidInfos) {
+      throw new Error("Bad Value");
+    }
+
+    const newOrder = req.body;
+    newOrder.memberId = res.locals.id;
+    const tradeNo = "test" + new Date().getTime();
+
+    newOrder.tradeNo = tradeNo;
+    const orderId = await createOrderDal(newOrder, t);
+    await bulkCreateProductsInOrderDal(orderId, req.body.productInfos, t);
+
+    const { html } = ecpayCreditOneTime({
+      totalAmount: req.body.grandTotal.toString(),
+      tradeDesc: "Description",
+      itemName: "ItemName",
+      orderId: orderId.toString(),
+      tradeNo: tradeNo,
+    });
+    await t.commit();
+    res.status(201).json(html);
+  } catch (err) {
+    handleError(err, res);
   }
 };
 
